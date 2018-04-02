@@ -26,6 +26,9 @@ jobs:
           key: dependency-cache-{{ checksum "Gemfile.lock" }}
       - run:
           name: Install package dependencies
+          command: bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - run:
+          name: Hello task
           command: bundle exec rake hello
 
 workflows:
