@@ -31,6 +31,24 @@ jobs:
           name: Hello task
           command: bundle exec rake hello
 
+  deploy:
+    docker:
+      - image: circleci/ruby:2.4-node
+    working_directory: ~/ruby-sinatra-simple
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "Gemfile.lock" }}
+      - run:
+          name: Install package dependencies
+          command: bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - run:
+          name: Hello task
+          command: bundle exec rake hello
+      - run:
+          name: Run Setup Script
+          command: bash ci/setup-heroku.sh
+
 workflows:
   version: 2
   build_test_deploy:
@@ -39,3 +57,10 @@ workflows:
       - test:
           requires:
             - build
+      - deploy:
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - master
